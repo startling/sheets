@@ -14,4 +14,3 @@ renderTable = liftM (table . sequence_) . rows (return . renderRow)
   where
     renderRow :: [Text] -> Html
     renderRow = tr . mapM_ (td . toMarkup)
-    
