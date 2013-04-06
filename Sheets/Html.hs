@@ -9,9 +9,9 @@ import Text.Blaze.Html5
 -- sheets
 import Sheets
 
-renderRows :: [[Text]] -> Html
-renderRows t = table $ forM_ t renderRow where
-  renderRow c = tr . forM_ c $ td . toMarkup
-
 renderTable :: Monad m => Table m t -> m Html
-renderTable t = renderRows `liftM` asRows t
+renderTable = liftM (table . sequence_) . rows (return . renderRow)
+  where
+    renderRow :: [Text] -> Html
+    renderRow = tr . mapM_ (td . toMarkup)
+    
