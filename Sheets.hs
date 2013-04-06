@@ -41,4 +41,4 @@ columns fn (Table cs ms) = ms >>= \is -> forM cs $
 columns_ :: Monad m => ([Text] -> m c) -> Table m t -> m ()
 columns_ fn (Table cs ms) = ms >>= \is -> forM_ cs $
   \(Column c) -> forM is c >>= fn
-  
+
