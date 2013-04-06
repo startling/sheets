@@ -15,8 +15,8 @@ data Column m a = Column
   }
 
 data Table m a = Table
-  { columns :: [Column m a]
-  , rows    :: m [a]
+  { fields :: [Column m a]
+  , items  :: m [a]
   }
  
 counter :: (Num n, Show s, MonadState s m) =>
