@@ -19,15 +19,20 @@ data Table m a = Table
   , items  :: m [a]
   }
 
+-- | Monadically traverse the rows in a table.
+rows :: Monad m => ([Text] -> m r) -> Table m t -> m [r]
+rows fn (Table cs ms) = ms >>= \is -> forM is $
+  \i -> forM cs (($ i) . field) >>= fn
+
+-- | Monadically traverse the columns in a table.
+columns :: Monad m => ([Text] -> m c) -> Table m t -> m [c]
+columns fn (Table cs ms) = ms >>= \is -> forM cs $
+  \(Column c) -> forM is c >>= fn
+
+-- | A column taking a lens into a number in the state and
+-- counting up from that number.
 counter :: (Show n, Num n, MonadState s m) =>
   Simple Lens s n -> Column m x
 counter l = Column . const $ (l += 1)
   >> ((pack . show) `liftM` use l)
 
-rows :: Monad m => ([Text] -> m r) -> Table m t -> m [r]
-rows fn (Table cs ms) = ms >>= \is -> forM is $
-  \i -> forM cs (($ i) . field) >>= fn
-
-columns :: Monad m => ([Text] -> m c) -> Table m t -> m [c]
-columns fn (Table cs ms) = ms >>= \is -> forM cs $
-  \(Column c) -> forM is c >>= fn
