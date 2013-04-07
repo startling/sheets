@@ -3,6 +3,9 @@ module Main where
 -- base
 import Control.Applicative
 import Data.Monoid
+import System.Environment
+-- filepath
+import System.FilePath
 -- mtl
 import Control.Monad.State
 -- lens
@@ -13,10 +16,10 @@ import Data.Text (Text)
 import Sheets
 -- either
 import Control.Monad.Trans.Either
--- xmlhtml
-import Text.XmlHtml
 -- bytestring
 import qualified Data.ByteString as B
+-- utf8-string
+import Data.ByteString.UTF8 (fromString)
 -- blaze-builder
 import Blaze.ByteString.Builder
 -- heist
@@ -49,22 +52,34 @@ example = Table
   , "c"
   ]
 
-config :: MonadIO m => EitherT [String] IO (HeistConfig m)
-config = (`fmap` loadTemplates ".") $ HeistConfig
+config :: MonadIO m => FilePath -> EitherT [String] IO (HeistConfig m)
+config d = (`fmap` loadTemplates d) $ HeistConfig
   (
     [ ("example-table", withTable example)
     ] ++ defaultInterpretedSplices
   ) defaultLoadTimeSplices [] []
 
-main = eitherT showErrors return $ config >>= initHeist >>= go where
+-- Configure and render in a heist state, given the directory
+-- that a template is in and the name of the template.
+render :: String -> String -> EitherT [String] IO ()
+render d f = do
+  h <- config d >>= initHeist
+  m <- lift . renderTemplate h . fromString $ f
+  maybe (left ["Template not found: " ++ f])
+    (lift . toByteStringIO B.putStr . fst) m
+
+main :: IO ()
+main = eitherT showErrors return $ arguments >>= uncurry render where
+  -- Separate the first command-line argument into the
+  -- directory and the extension-less name of the template.
+  arguments :: EitherT [String] IO (String, String)
+  arguments = lift getArgs >>= \x -> case x of
+    [] -> left ["No file specified."]
+    (a:_) -> right (takeDirectory a, takeBaseName a)
+  -- Display the errors we've gotten.
   showErrors :: [String] -> IO ()
   showErrors ss = putStrLn "Found the following errors:"
     >> forM_ ss (putStrLn . ("--> " ++))
-  go :: HeistState IO -> EitherT [String] IO ()
-  go hs = lift (renderTemplate hs "sheet")
-    >>= maybe (left ["Couldn't find template."]) (lift . output)
-  output :: (Builder, MIMEType) -> IO ()
-  output (b, _) = toByteStringIO B.putStr b
 
 -- TODO: clean up code
 -- TODO: more templates? add just a file to a templaterepo?
