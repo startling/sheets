@@ -32,15 +32,6 @@ rows :: Monad m => ([Text] -> m r) -> Table m t -> m [r]
 rows fn (Table cs ms) = ms >>= \is -> forM is $
   \i -> forM cs (($ i) . field) >>= fn
 
-rows_ :: Monad m => ([Text] -> m r) -> Table m t -> m ()
-rows_ fn (Table cs ms) = ms >>= \is -> forM_ is $
-  \i -> forM cs (($ i) . field) >>= fn
-  
 columns :: Monad m => ([Text] -> m c) -> Table m t -> m [c]
 columns fn (Table cs ms) = ms >>= \is -> forM cs $
   \(Column c) -> forM is c >>= fn
-
-columns_ :: Monad m => ([Text] -> m c) -> Table m t -> m ()
-columns_ fn (Table cs ms) = ms >>= \is -> forM_ cs $
-  \(Column c) -> forM is c >>= fn
-
