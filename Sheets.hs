@@ -1,3 +1,4 @@
+{-# Language Rank2Types #-}
 module Sheets where
 -- base
 import Control.Applicative
@@ -5,6 +6,8 @@ import Control.Monad
 import Data.List
 -- mtl
 import Control.Monad.State
+-- transformers
+import Data.Functor.Identity
 -- Text
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -20,11 +23,10 @@ data Table m a = Table
   , items  :: m [a]
   }
 
-counter :: (Num n, Show s, MonadState s m) =>
-  ASetter' s n -> Column m a
-counter l = Column . const . liftM (T.pack . show) $ increment l where
-  increment :: (Num n, MonadState s m) => ASetter' s n -> m s
-  increment l = liftM2 const get $ l += 1
+counter :: (Show n, Num n, MonadState s m) =>
+  Simple Lens s n -> Column m x
+counter l = Column . const $ (l += 1)
+  >> ((T.pack . show) `liftM` use l)
 
 rows :: Monad m => ([Text] -> m r) -> Table m t -> m [r]
 rows fn (Table cs ms) = ms >>= \is -> forM is $
