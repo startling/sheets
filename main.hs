@@ -71,3 +71,4 @@ main = eitherT showErrors return $ config >>= initHeist >>= go where
 -- TODO: list files
 -- TODO: per-header
 -- TODO: easy table rendering
+-- TODO: more modular withTable
