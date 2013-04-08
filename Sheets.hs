@@ -38,7 +38,8 @@ import Paths_sheets
 #endif
 
 data Field m a = Field
-  { field :: a -> m Text
+  { classes :: [String]
+  , field :: a -> m Text
   }
 
 data Table m a = Table
@@ -52,7 +53,7 @@ rows fn (Table cs is) = forM is $ \i -> forM cs (($ i) . field) >>= fn
 
 -- | Monadically traverse the columns in a table.
 columns :: Monad m => ([Text] -> m c) -> Table m t -> m [c]
-columns fn (Table cs is) = forM cs $ \(Field c) -> forM is c >>= fn
+columns fn (Table cs is) = forM cs $ \(Field _ c) -> forM is c >>= fn
 
 -- | Split a table, given the number of rows each should have.
 split :: Int -> Table m a -> [Table m a]
@@ -65,12 +66,12 @@ split n (Table fs is) = Table fs `map` taking n is where
 -- counting up from that number.
 counter :: (Show n, Num n, MonadState s m) =>
   Simple Lens s n -> Field m x
-counter l = Field . const $ (l += 1)
+counter l = Field ["count"] . const $ (l += 1)
   >> ((pack . show) `liftM` use l)
 
 -- | A column just showing the 'Text' in the row.
 see :: Monad m => Field m Text
-see = Field $ return . id
+see = Field [] $ return . id
 
 data Layout a
   = Column [Either a (Layout a)]
