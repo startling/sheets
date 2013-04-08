@@ -36,3 +36,6 @@ counter :: (Show n, Num n, MonadState s m) =>
 counter l = Field . const $ (l += 1)
   >> ((pack . show) `liftM` use l)
 
+-- | A column just showing the 'Text' in the row.
+see :: Monad m => Field m Text
+see = Field $ return . id
