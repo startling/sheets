@@ -10,12 +10,12 @@ import Data.Text (pack)
 -- lens
 import Control.Lens
 
-data Column m a = Column
+data Field m a = Field
   { field :: a -> m Text
   }
 
 data Table m a = Table
-  { fields :: [Column m a]
+  { fields :: [Field m a]
   , items  :: m [a]
   }
 
@@ -27,12 +27,12 @@ rows fn (Table cs ms) = ms >>= \is -> forM is $
 -- | Monadically traverse the columns in a table.
 columns :: Monad m => ([Text] -> m c) -> Table m t -> m [c]
 columns fn (Table cs ms) = ms >>= \is -> forM cs $
-  \(Column c) -> forM is c >>= fn
+  \(Field c) -> forM is c >>= fn
 
 -- | A column taking a lens into a number in the state and
 -- counting up from that number.
 counter :: (Show n, Num n, MonadState s m) =>
-  Simple Lens s n -> Column m x
-counter l = Column . const $ (l += 1)
+  Simple Lens s n -> Field m x
+counter l = Field . const $ (l += 1)
   >> ((pack . show) `liftM` use l)
 
