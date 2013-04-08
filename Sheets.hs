@@ -14,6 +14,7 @@ import Control.Lens
 import Text.Blaze.Html
 import qualified Text.Blaze.Html5 as T
 import Text.Blaze.Html5.Attributes (charset, class_)
+import Text.Blaze.Html.Renderer.Pretty
 
 data Field m a = Field
   { field :: a -> m Text
@@ -76,7 +77,7 @@ renderLayout f (Adjacent as) = liftM sequence_ $ forM as $
   liftM ((! class_ "_adjacent") . T.div) . either f (renderLayout f)
 
 -- | Render a 'Layout' of 'Table' as a full document, given some css.
-render :: Monad m => T.Text -> Layout (Table m t) -> m Html
+render :: Monad m => Text -> Layout (Table m t) -> m Html
 render css = liftM (template css) . renderLayout renderTable where
   -- | Basic html to wrap something in.
   template :: Text -> Html -> Html
@@ -88,6 +89,6 @@ render css = liftM (template css) . renderLayout renderTable where
 
 -- | Render a 'Layout' of 'Table' as a full document and save it
 -- to some file path.
-html :: Monad m => T.Text -> FilePath -> Layout (Table m t) -> m (IO ())
+html :: Monad m => Text -> FilePath -> Layout (Table m t) -> m (IO ())
 html css fp = liftM (writeFile fp . renderHtml) . render css
 
