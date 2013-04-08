@@ -16,18 +16,16 @@ data Field m a = Field
 
 data Table m a = Table
   { fields :: [Field m a]
-  , items  :: m [a]
+  , items  :: [a]
   }
 
 -- | Monadically traverse the rows in a table.
 rows :: Monad m => ([Text] -> m r) -> Table m t -> m [r]
-rows fn (Table cs ms) = ms >>= \is -> forM is $
-  \i -> forM cs (($ i) . field) >>= fn
+rows fn (Table cs is) = forM is $ \i -> forM cs (($ i) . field) >>= fn
 
 -- | Monadically traverse the columns in a table.
 columns :: Monad m => ([Text] -> m c) -> Table m t -> m [c]
-columns fn (Table cs ms) = ms >>= \is -> forM cs $
-  \(Field c) -> forM is c >>= fn
+columns fn (Table cs is) = forM cs $ \(Field c) -> forM is c >>= fn
 
 -- | A column taking a lens into a number in the state and
 -- counting up from that number.
