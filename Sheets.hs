@@ -24,6 +24,7 @@ import Control.Monad.State
 -- Text
 import Data.Text (Text)
 import Data.Text (pack)
+import qualified Data.Text.IO as T
 -- lens
 import Control.Lens
 -- blaze-html
@@ -113,11 +114,12 @@ html :: Monad m => Text -> FilePath -> Layout (Table m t) -> m (IO ())
 html css fp = liftM (writeFile fp . renderHtml) . render css
 
 -- | The default stylesheet.
-style :: IO FilePath
--- Stupid hack so that we can still run this file in ghci; otherwise
--- we wouldn't be able to find the Paths_sheets module.
+style :: IO Text
+style = path >>= T.readFile where
+  -- Stupid hack so that we can still run this file in ghci; otherwise
+  -- we wouldn't be able to find the Paths_sheets module.
 #ifdef MIN_VERSION_base(0,0,0)
-style = getDataFileName "style.css"
+  path = getDataFileName "style.css"
 #else
-style = return "data/style.css"
+  path = return "data/style.css"
 #endif
