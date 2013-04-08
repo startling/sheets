@@ -52,16 +52,17 @@ example = Table
   , "c"
   ]
 
-config :: MonadIO m => FilePath -> EitherT [String] IO (HeistConfig m)
-config d = (`fmap` loadTemplates d) $ HeistConfig
+config :: MonadIO m => [FilePath] -> EitherT [String] IO (HeistConfig m)
+config ds = (`fmap` foldM combine mempty ds) $ HeistConfig
   (
     [ ("example-table", withTable example)
     ] ++ defaultInterpretedSplices
-  ) defaultLoadTimeSplices [] []
+  ) defaultLoadTimeSplices [] [] where
+    combine a b = mappend a `liftM` loadTemplates b
 
--- Configure and render in a heist state, given the directory
--- that a template is in and the name of the template.
-render :: String -> String -> EitherT [String] IO ()
+-- Configure and render in a heist state, given some directories
+-- that a templates are in and the name of the template.
+render :: [String] -> String -> EitherT [String] IO ()
 render d f = do
   h <- config d >>= initHeist
   m <- lift . renderTemplate h . fromString $ f
@@ -69,7 +70,8 @@ render d f = do
     (lift . toByteStringIO B.putStr . fst) m
 
 main :: IO ()
-main = eitherT showErrors return $ arguments >>= uncurry render where
+main = eitherT showErrors return $ arguments
+  >>= uncurry (render . return) where
   -- Separate the first command-line argument into the
   -- directory and the extension-less name of the template.
   arguments :: EitherT [String] IO (String, String)
