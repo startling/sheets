@@ -43,13 +43,16 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 -- Include all the templates in data/
-data-files:          data/*.tpl
+data-files:          data/*.css
 
 library
   exposed-modules:
-    Sheets
+      Sheets
+  other-modules:
+      Paths_sheets
   build-depends:
       base >= 4 && < 5
     , mtl >= 2.1.2 && < 3
     , text >= 0.11.2.3 && < 0.12
     , lens >= 3.8.5 && < 3.9
+    , blaze-html >= 0.5.1.3
