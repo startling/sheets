@@ -44,3 +44,10 @@ counter l = Field . const $ (l += 1)
 see :: Monad m => Field m Text
 see = Field $ return . id
 
+data Layout a
+  = Column [a]
+  | Adjacent [a] deriving
+  ( Eq
+  , Ord
+  , Show
+  )
