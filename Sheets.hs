@@ -52,3 +52,7 @@ data Layout a
   , Ord
   , Show
   )
+
+-- | Split a table horizontally.
+horizontal :: Int -> Table m a -> Layout (Table m a)
+horizontal n = Adjacent . map Left . split n
