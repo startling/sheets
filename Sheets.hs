@@ -1,4 +1,5 @@
 {-# Language Rank2Types #-}
+{-# Language OverloadedStrings #-}
 module Sheets where
 -- base
 import Control.Monad
@@ -31,6 +32,7 @@ columns fn (Table cs is) = forM cs $ \(Field c) -> forM is c >>= fn
 split :: Int -> Table m a -> [Table m a]
 split n (Table fs is) = Table fs `map` taking n is where
   taking :: Int -> [a] -> [[a]]
+  taking _ [] = []
   taking n x = let (a, b) = splitAt n x in a : taking n b
   
 -- | A column taking a lens into a number in the state and
