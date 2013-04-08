@@ -75,10 +75,19 @@ renderLayout f (Column cs) = liftM sequence_ $
 renderLayout f (Adjacent as) = liftM sequence_ $ forM as $
   liftM ((! class_ "_adjacent") . T.div) . either f (renderLayout f)
 
--- | Basic html to wrap something in.
-template :: Text -> Html -> Html
-template css t = T.docTypeHtml $ do
-  T.head $ do
-    T.meta ! charset "utf-8"
-    T.style $ toMarkup css
-  T.body $ t
+-- | Render a 'Layout' of 'Table' as a full document, given some css.
+render :: Monad m => T.Text -> Layout (Table m t) -> m Html
+render css = liftM (template css) . renderLayout renderTable where
+  -- | Basic html to wrap something in.
+  template :: Text -> Html -> Html
+  template css t = T.docTypeHtml $ do
+    T.head $ do
+      T.meta ! charset "utf-8"
+      T.style $ toMarkup css
+    T.body $ t
+
+-- | Render a 'Layout' of 'Table' as a full document and save it
+-- to some file path.
+html :: Monad m => T.Text -> FilePath -> Layout (Table m t) -> m (IO ())
+html css fp = liftM (writeFile fp . renderHtml) . render css
+
