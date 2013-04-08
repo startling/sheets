@@ -45,8 +45,9 @@ see :: Monad m => Field m Text
 see = Field $ return . id
 
 data Layout a
-  = Column [a]
-  | Adjacent [a] deriving
+  = Column [Either a (Layout a)]
+  | Adjacent [Either a (Layout a)]
+  deriving
   ( Eq
   , Ord
   , Show
