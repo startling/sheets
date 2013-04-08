@@ -1,6 +1,22 @@
+{-# Language CPP #-}
 {-# Language Rank2Types #-}
 {-# Language OverloadedStrings #-}
-module Sheets where
+module Sheets
+  ( Field(..)
+  , Table(..)
+  , rows
+  , columns
+  , split
+  , counter
+  , see
+  , Layout(..)
+  , horizontal
+  , renderTable
+  , renderLayout
+  , render
+  , html
+  , style )
+  where
 -- base
 import Control.Monad
 -- mtl
@@ -15,6 +31,10 @@ import Text.Blaze.Html
 import qualified Text.Blaze.Html5 as T
 import Text.Blaze.Html5.Attributes (charset, class_)
 import Text.Blaze.Html.Renderer.Pretty
+-- provided by cabal
+#ifdef MIN_VERSION_base(0,0,0)
+import Paths_sheets
+#endif
 
 data Field m a = Field
   { field :: a -> m Text
@@ -92,3 +112,12 @@ render css = liftM (template css) . renderLayout renderTable where
 html :: Monad m => Text -> FilePath -> Layout (Table m t) -> m (IO ())
 html css fp = liftM (writeFile fp . renderHtml) . render css
 
+-- | The default stylesheet.
+style :: IO FilePath
+-- Stupid hack so that we can still run this file in ghci; otherwise
+-- we wouldn't be able to find the Paths_sheets module.
+#ifdef MIN_VERSION_base(0,0,0)
+style = getDataFileName "style.css"
+#else
+style = return "data/style.css"
+#endif
