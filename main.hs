@@ -1,3 +1,4 @@
+{-# Language CPP #-}
 {-# Language OverloadedStrings #-}
 module Main where
 -- base
@@ -25,7 +26,19 @@ import Blaze.ByteString.Builder
 -- heist
 import Heist
 import Heist.Interpreted
---
+-- provided by cabal
+#ifdef MIN_VERSION_base(0, 0, 0)
+import Paths_sheets (getDataFileName)
+#endif
+
+-- If this is being built by cabal, get the cabal-installed data files;
+-- otherwise, just stick an empty list in there.
+otherTemplates :: IO [FilePath]
+#ifdef MIN_VERSION_base(0, 0, 0)
+otherTemplates = return `liftM` getDataFileName ""
+#else
+otherTemplates = return []
+#endif
 
 forTable :: (Monad m, Monad n) =>
   (([Text] -> Splice n) -> b -> m [[a]]) -> b -> m [a]
@@ -70,8 +83,8 @@ render d f = do
     (lift . toByteStringIO B.putStr . fst) m
 
 main :: IO ()
-main = eitherT showErrors return $ arguments
-  >>= uncurry (render . return) where
+main = eitherT showErrors return $ lift otherTemplates >>=
+  \ot -> arguments >>=  uncurry (render . (: ot)) where
   -- Separate the first command-line argument into the
   -- directory and the extension-less name of the template.
   arguments :: EitherT [String] IO (String, String)
@@ -84,7 +97,6 @@ main = eitherT showErrors return $ arguments
     >> forM_ ss (putStrLn . ("--> " ++))
 
 -- TODO: clean up code
--- TODO: more templates? add just a file to a templaterepo?
 -- TODO: list files
 -- TODO: per-header
 -- TODO: easy table rendering
