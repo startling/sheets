@@ -1,5 +1,6 @@
 {-# Language CPP #-}
 {-# Language Rank2Types #-}
+{-# Language TemplateHaskell #-}
 {-# Language OverloadedStrings #-}
 module Sheets
   ( Field(..)
@@ -38,18 +39,20 @@ import Paths_sheets
 #endif
 
 data Field m a = Field
-  { classes :: [String]
-  , field :: a -> m Text
+  { _classes :: [String]
+  , _field :: a -> m Text
   }
+makeLenses ''Field
 
 data Table m a = Table
-  { fields :: [Field m a]
-  , items  :: [a]
+  { _fields :: [Field m a]
+  , _items  :: [a]
   }
+makeLenses ''Table 
 
 -- | Monadically traverse the rows in a table.
 rows :: Monad m => ([Text] -> m r) -> Table m t -> m [r]
-rows fn (Table cs is) = forM is $ \i -> forM cs (($ i) . field) >>= fn
+rows fn (Table cs is) = forM is $ \i -> forM cs (($ i) . view field) >>= fn
 
 -- | Monadically traverse the columns in a table.
 columns :: Monad m => ([Text] -> m c) -> Table m t -> m [c]
