@@ -10,6 +10,10 @@ import Data.Text (Text)
 import Data.Text (pack)
 -- lens
 import Control.Lens
+-- blaze-html
+import Text.Blaze.Html
+import qualified Text.Blaze.Html5 as T
+import Text.Blaze.Html5.Attributes (charset, class_)
 
 data Field m a = Field
   { field :: a -> m Text
@@ -58,3 +62,23 @@ data Layout a
 -- | Split a table horizontally.
 horizontal :: Int -> Table m a -> Layout (Table m a)
 horizontal n = Adjacent . map Left . split n
+
+-- | Render a table simply to html.
+renderTable :: Monad m => Table m t -> m Html
+renderTable = liftM (T.table . sequence_) .
+  rows (return . T.tr . mapM_ (T.td . toMarkup))
+
+-- | Render a 'Layout' to html.
+renderLayout :: Monad m => (a -> m Html) -> Layout a -> m Html
+renderLayout f (Column cs) = liftM sequence_ $
+  forM cs $ either f (renderLayout f)
+renderLayout f (Adjacent as) = liftM sequence_ $ forM as $
+  liftM ((! class_ "_adjacent") . T.div) . either f (renderLayout f)
+
+-- | Basic html to wrap something in.
+template :: Text -> Html -> Html
+template css t = T.docTypeHtml $ do
+  T.head $ do
+    T.meta ! charset "utf-8"
+    T.style $ toMarkup css
+  T.body $ t
