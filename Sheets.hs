@@ -10,6 +10,7 @@ module Sheets
   , split
   , counter
   , see
+  , blank
   , Layout(..)
   , horizontal
   , renderTable
@@ -25,7 +26,7 @@ import Data.String
 import Control.Monad.State
 -- Text
 import Data.Text (Text)
-import Data.Text (pack)
+import Data.Text (pack, empty)
 import qualified Data.Text.IO as T
 -- lens
 import Control.Lens
@@ -76,6 +77,10 @@ counter l = Field ["count"] . const $ (l += 1)
 -- | A column just showing the 'Text' in the row.
 see :: Monad m => Field m Text
 see = Field [] $ return . id
+
+-- | An empty column.
+blank :: Monad m => Field m a
+blank = Field [] $ \_ -> return empty
 
 data Layout a
   = Column [Either a (Layout a)]
