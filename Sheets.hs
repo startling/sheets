@@ -34,7 +34,7 @@ import Control.Lens
 -- blaze-html
 import Text.Blaze.Html
 import qualified Text.Blaze.Html5 as T
-import Text.Blaze.Html5.Attributes (charset, class_)
+import Text.Blaze.Html5.Attributes (charset, class_, colspan)
 import Text.Blaze.Html.Renderer.Pretty
 -- provided by cabal
 #ifdef MIN_VERSION_base(0,0,0)
@@ -107,6 +107,10 @@ renderTable t = do
   x <- flip rows t $ return . T.tr . mapM_ (T.td . toMarkup)
   return . T.table $ do
     T.colgroup $ cols t
+    case (view title t) of
+      Nothing -> return ()
+      Just tt -> T.th (toMarkup tt) ! colspan
+        (fromString . show . length $ view fields t)
     sequence_ x
   where 
     cols :: Monad m => Table m a -> Html
