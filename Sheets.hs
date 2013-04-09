@@ -8,6 +8,7 @@ module Sheets
   , rows
   , columns
   , split
+  , split'
   , counter
   , see
   , blank
@@ -68,6 +69,13 @@ split n (Table t fs is) = Table t fs `map` taking n is where
   taking :: Int -> [a] -> [[a]]
   taking _ [] = []
   taking n x = let (a, b) = splitAt n x in a : taking n b
+
+-- | Split a table into a table with twice as many fields and
+-- half as many items.
+split' :: Table m b -> Table m (b, b)
+split' (Table t fs is) = Table t
+  (map (over field (. fst)) fs ++ map (over field (. snd)) fs)
+  . uncurry zip . splitAt (length is `div` 2) $ is
   
 -- | A column taking a lens into a number in the state and
 -- counting up from that number.
