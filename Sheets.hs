@@ -11,6 +11,7 @@ module Sheets
   , counter
   , see
   , blank
+  , (*.)
   , Layout(..)
   , horizontal
   , renderTable
@@ -81,6 +82,10 @@ see = Field [] $ return . id
 -- | An empty column.
 blank :: Monad m => Field m a
 blank = Field [] $ \_ -> return empty
+
+-- | Add a class to a 'Field'.
+(*.) :: Field m a -> String -> Field m a
+(*.) f s = classes <>~ [s] $ f
 
 data Layout a
   = Column [Either a (Layout a)]
