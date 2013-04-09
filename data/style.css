@@ -25,8 +25,11 @@ td {
     height: 1em;
 }
 
+col.count {
+    width: 3em;
+}
+
 td:first-child {
-    width: 2em;
     border-right: 1px dashed;
     border-left: 1px solid;
 }
