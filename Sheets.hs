@@ -48,22 +48,23 @@ data Field m a = Field
 makeLenses ''Field
 
 data Table m a = Table
-  { _fields :: [Field m a]
+  { _title  :: Maybe Text
+  , _fields :: [Field m a]
   , _items  :: [a]
   }
 makeLenses ''Table 
 
 -- | Monadically traverse the rows in a table.
 rows :: Monad m => ([Text] -> m r) -> Table m t -> m [r]
-rows fn (Table cs is) = forM is $ \i -> forM cs (($ i) . view field) >>= fn
+rows fn (Table _ cs is) = forM is $ \i -> forM cs (($ i) . view field) >>= fn
 
 -- | Monadically traverse the columns in a table.
 columns :: Monad m => ([Text] -> m c) -> Table m t -> m [c]
-columns fn (Table cs is) = forM cs $ \(Field _ c) -> forM is c >>= fn
+columns fn (Table _ cs is) = forM cs $ \(Field _ c) -> forM is c >>= fn
 
 -- | Split a table, given the number of rows each should have.
 split :: Int -> Table m a -> [Table m a]
-split n (Table fs is) = Table fs `map` taking n is where
+split n (Table t fs is) = Table t fs `map` taking n is where
   taking :: Int -> [a] -> [[a]]
   taking _ [] = []
   taking n x = let (a, b) = splitAt n x in a : taking n b
