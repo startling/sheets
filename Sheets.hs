@@ -20,6 +20,7 @@ module Sheets
   where
 -- base
 import Control.Monad
+import Data.String
 -- mtl
 import Control.Monad.State
 -- Text
@@ -91,8 +92,17 @@ horizontal n = Adjacent . map Left . split n
 
 -- | Render a table simply to html.
 renderTable :: Monad m => Table m t -> m Html
-renderTable = liftM (T.table . sequence_) .
-  rows (return . T.tr . mapM_ (T.td . toMarkup))
+renderTable t = do
+  x <- flip rows t $ return . T.tr . mapM_ (T.td . toMarkup)
+  return . T.table $ do
+    T.colgroup $ cols t
+    sequence_ x
+  where 
+    cols :: Monad m => Table m a -> Html
+    cols = mapMOf_ (fields . traverse) toCol where
+      toCol :: Monad m => Field m a -> Html
+      toCol f = let s = fromString . unwords $ view classes f
+        in T.col ! class_ s
 
 -- | Render a 'Layout' to html.
 renderLayout :: Monad m => (a -> m Html) -> Layout a -> m Html
