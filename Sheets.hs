@@ -21,13 +21,14 @@ module Sheets
   , style )
   where
 -- base
+import Prelude hiding (null)
 import Control.Monad
 import Data.String
 -- mtl
 import Control.Monad.State
 -- Text
 import Data.Text (Text)
-import Data.Text (pack, empty)
+import Data.Text (pack, empty, null)
 import qualified Data.Text.IO as T
 -- lens
 import Control.Lens
@@ -130,7 +131,7 @@ renderTable t = do
     cols = mapMOf_ (fields . traverse) toCol where
       toCol :: Monad m => Field m a -> Html
       toCol f = let s = fromString . unwords $ view classes f
-        in T.col ! class_ s
+        in if null s then T.col else T.col ! class_ s
 
 -- | Render a 'Layout' to html.
 renderLayout :: Monad m => (a -> m Html) -> Layout a -> m Html
