@@ -55,7 +55,7 @@ options = style >>= \css -> return $
     <*> pure Nothing
     <*> argument Just
       (  metavar "input"
-      <> help "Beetle input file."
+      <> help "Input file"
       )
     <*>
       ( Just <$>
