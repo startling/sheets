@@ -104,7 +104,8 @@ data Layout a
   , Show
   )
 
--- | Split a table horizontally.
+-- | Split a table horizontally into tables with the given
+-- number of columns.
 horizontal :: Int -> Table m a -> Layout (Table m a)
 horizontal n = Adjacent . map Left . split n
 
