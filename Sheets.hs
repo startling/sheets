@@ -109,6 +109,11 @@ data Layout a
 horizontal :: Int -> Table m a -> Layout (Table m a)
 horizontal n = Adjacent . map Left . split n
 
+-- | Split a table vertically into tables with the given
+-- number of columns.
+vertical :: Int -> Table m a -> Layout (Table m a)
+vertical n = Column . map Left . split n
+
 -- | Render a table simply to html.
 renderTable :: Monad m => Table m t -> m Html
 renderTable t = do
