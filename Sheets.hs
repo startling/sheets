@@ -150,7 +150,7 @@ style = path where
   -- Stupid hack so that we can still run this file in ghci; otherwise
   -- we wouldn't be able to find the Paths_sheets module.
 #ifdef MIN_VERSION_base(0,0,0)
-  path = getDataFileName "style.css"
+  path = getDataFileName "data/style.css"
 #else
   path = return "data/style.css"
 #endif
