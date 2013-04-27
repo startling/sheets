@@ -42,3 +42,7 @@ td:first-child {
     border-right: 1px dashed;
     border-left: 1px solid;
 }
+
+td:last-child {
+    border-right: 1px solid;
+}
