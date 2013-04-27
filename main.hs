@@ -60,13 +60,20 @@ options = style >>= \css -> return $
       <> help "Split the table into columns of length n."
        )
     <*> pure True
-    <*> pure Nothing
+    <*>
+      ( optional $
+        strOption
+          ( long "title"
+         <> short 't'
+         <> help "A title for the table."
+          )
+      )
     <*> argument Just
       ( metavar "input"
      <> help "Input file."
       )
     <*>
-      ( Just <$>
+      ( optional $
         argument Just
         ( metavar "output"
        <> help "File to output HTML to."
