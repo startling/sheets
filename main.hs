@@ -73,6 +73,7 @@ options = style >>= \css -> return $
           ( long "title"
          <> short 't'
          <> help "A title for the table."
+         <> metavar "string"
           )
        )
     <*> argument Just
