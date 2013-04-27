@@ -56,3 +56,16 @@ library
     , text >= 0.11.2.3 && < 0.12
     , lens >= 3.8.5 && < 3.9
     , blaze-html >= 0.5.1.3
+
+executable sheets
+  main-is: main.hs
+  other-modules:
+      Paths_sheets
+  build-depends:
+      base >= 4 && < 5
+    , mtl >= 2.1.2 && < 3
+    , text >= 0.11.2.3 && < 0.12
+    , lens >= 3.8.5 && < 3.9
+    , blaze-html >= 0.5.1.3
+    , transformers >= 0.3.0.0 && < 0.4
+    , optparse-applicative >= 0.5.2.1 && < 0.5.3
