@@ -50,7 +50,12 @@ options = style >>= \css -> return $
      <> metavar "file"
      <> value css
       )
-    <*> pure 50
+    <*> option
+      (  long "columns"
+      <> short 'c'
+      <> metavar "n"
+      <> help "Split the table into columns of length n."
+      )
     <*> pure True
     <*> pure Nothing
     <*> argument Just
