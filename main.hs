@@ -43,24 +43,26 @@ options = style >>= \css -> return $
     <$> switch 
       ( long "fragment"
      <> short 'f'
+     <> help "Create only a fragment, i.e. not a full HTMl document."
       )
     <*> strOption
       ( long "stylesheet"
      <> short 's'
      <> metavar "file"
      <> value css
+     <> help "The source file of an alternative stylesheet to embed in the document."
       )
     <*> option
-      (  long "columns"
+       ( long "columns"
       <> short 'c'
       <> metavar "n"
       <> help "Split the table into columns of length n."
-      )
+       )
     <*> pure True
     <*> pure Nothing
     <*> argument Just
       (  metavar "input"
-      <> help "Input file"
+      <> help "Input file."
       )
     <*>
       ( Just <$>
@@ -72,8 +74,8 @@ options = style >>= \css -> return $
 
 parser :: IO (ParserInfo Configuration)
 parser = options >>= \o -> return $ info (helper <*> o)
-   ( progDesc "TODO"
-  <> header "TODO"
+   ( progDesc "Create nice html tables out of plaintext."
+  <> header "sheets"
   <> fullDesc
    )
   
