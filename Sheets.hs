@@ -17,8 +17,7 @@ module Sheets
   , horizontal
   , renderTable
   , renderLayout
-  , render
-  , html
+  , renderWhole
   , style )
   where
 -- base
@@ -135,8 +134,8 @@ renderLayout f (Adjacent as) = liftM sequence_ $ forM as $
   liftM ((! class_ "_adjacent") . T.div) . either f (renderLayout f)
 
 -- | Render a 'Layout' of 'Table' as a full document, given some css.
-render :: Monad m => Text -> Layout (Table m t) -> m Html
-render css = liftM (template css) . renderLayout renderTable where
+renderWhole :: Monad m => Text -> Layout (Table m t) -> m Html
+renderWhole css = liftM (template css) . renderLayout renderTable where
   -- | Basic html to wrap something in.
   template :: Text -> Html -> Html
   template css t = T.docTypeHtml $ do
@@ -145,14 +144,9 @@ render css = liftM (template css) . renderLayout renderTable where
       T.style $ toMarkup css
     T.body $ t
 
--- | Render a 'Layout' of 'Table' as a full document and save it
--- to some file path.
-html :: Monad m => Text -> FilePath -> Layout (Table m t) -> m (IO ())
-html css fp = liftM (writeFile fp . renderHtml) . render css
-
 -- | The default stylesheet.
-style :: IO Text
-style = path >>= T.readFile where
+style :: IO FilePath
+style = path where
   -- Stupid hack so that we can still run this file in ghci; otherwise
   -- we wouldn't be able to find the Paths_sheets module.
 #ifdef MIN_VERSION_base(0,0,0)
