@@ -128,8 +128,10 @@ renderTable t = do
 
 -- | Render a 'Layout' to html.
 renderLayout :: Monad m => (a -> m Html) -> Layout a -> m Html
+renderLayout f (Column (Left a : [])) = f a
 renderLayout f (Column cs) = liftM sequence_ $
   forM cs $ either f (renderLayout f)
+renderLayout f (Adjacent (Left a : [])) = f a
 renderLayout f (Adjacent as) = liftM sequence_ $ forM as $
   liftM ((! class_ "_adjacent") . T.div) . either f (renderLayout f)
 
