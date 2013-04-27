@@ -59,7 +59,14 @@ options = style >>= \css -> return $
       <> value 50
       <> help "Split the table into columns of length n."
        )
-    <*> pure True
+    <*>
+      ( toggle <$>
+        switch
+          ( long "no-counter"
+         <> short 'n'
+         <> help "Do not include the counter on the left-hand side of the table."
+          )
+      )
     <*>
       ( optional $
         strOption
@@ -67,7 +74,7 @@ options = style >>= \css -> return $
          <> short 't'
          <> help "A title for the table."
           )
-      )
+       )
     <*> argument Just
       ( metavar "input"
      <> help "Input file."
@@ -79,6 +86,10 @@ options = style >>= \css -> return $
        <> help "File to output HTML to."
         )
       )
+  where
+    toggle :: Bool -> Bool
+    toggle True = False
+    toggle False = True
 
 parser :: IO (ParserInfo Configuration)
 parser = options >>= \o -> return $ info (helper <*> o)
