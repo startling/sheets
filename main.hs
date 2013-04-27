@@ -21,7 +21,6 @@ import Control.Lens hiding (argument)
 -- sheets
 import Sheets
 
--- TODO: finish option parser
 -- TODO: real csv
 
 data Configuration = Configuration
