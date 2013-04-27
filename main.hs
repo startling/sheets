@@ -56,19 +56,20 @@ options = style >>= \css -> return $
        ( long "columns"
       <> short 'c'
       <> metavar "n"
+      <> value 50
       <> help "Split the table into columns of length n."
        )
     <*> pure True
     <*> pure Nothing
     <*> argument Just
-      (  metavar "input"
-      <> help "Input file."
+      ( metavar "input"
+     <> help "Input file."
       )
     <*>
       ( Just <$>
         argument Just
-        (  metavar "output"
-        <> help "File to output HTML to."
+        ( metavar "output"
+       <> help "File to output HTML to."
         )
       )
 
