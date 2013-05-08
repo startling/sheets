@@ -25,6 +25,7 @@ td {
     border-left: none;
     padding: .5em;
     height: 1em;
+    text-align: center;
 }
 
 th {
@@ -38,12 +39,15 @@ th {
 
 col.count {
     width: 3em;
+    border-right: 1px dashed;
+    border-left: 1px dashed;
 }
 
 td:first-child {
-    border-right: 1px dashed;
     border-left: 1px solid;
+    text-align: left;
 }
+
 
 td:last-child {
     border-right: 1px solid;

@@ -19,7 +19,8 @@ import Text.Blaze.Html.Renderer.Pretty
 -- lens
 import Control.Lens hiding (argument)
 -- sheets
-import Sheets
+import Sheets hiding (title)
+import Sheets.Html
 
 -- TODO: real csv
 
