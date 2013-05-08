@@ -43,6 +43,7 @@ import Paths_sheets
 
 data Field m a = Field
   { _classes :: [String]
+  , _label :: Maybe Text
   , _field :: a -> m Text
   }
 makeLenses ''Field
@@ -60,7 +61,7 @@ rows fn (Table _ cs is) = forM is $ \i -> forM cs (($ i) . view field) >>= fn
 
 -- | Monadically traverse the columns in a table.
 columns :: Monad m => ([Text] -> m c) -> Table m t -> m [c]
-columns fn (Table _ cs is) = forM cs $ \(Field _ c) -> forM is c >>= fn
+columns fn (Table _ cs is) = forM cs $ \(Field _ _ c) -> forM is c >>= fn
 
 -- | Split a table, given the number of rows each should have.
 split :: Int -> Table m a -> [Table m a]
@@ -80,16 +81,16 @@ split' (Table t fs is) = Table t
 -- counting up from that number.
 counter :: (Show n, Num n, MonadState s m) =>
   Simple Lens s n -> Field m x
-counter l = Field ["count"] . const $ (l += 1)
+counter l = Field ["count"] Nothing . const $ (l += 1)
   >> ((pack . show) `liftM` use l)
 
 -- | A column just showing the 'Text' in the row.
 see :: Monad m => Field m Text
-see = Field [] $ return . id
+see = Field [] Nothing $ return . id
 
 -- | An empty column.
 blank :: Monad m => Field m a
-blank = Field [] $ \_ -> return empty
+blank = Field [] Nothing $ \_ -> return empty
 
 -- | Add a class to a 'Field'.
 (*.) :: Field m a -> String -> Field m a
