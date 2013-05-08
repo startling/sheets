@@ -30,6 +30,9 @@ renderTable t = do
       Nothing -> return ()
       Just tt -> T.th (toMarkup tt) ! colspan
         (fromString . show . length $ view fields t)
+    case traverse (view label) . view fields $ t of
+      Nothing -> return ()
+      Just ls -> T.tr (forM_ ls $ T.td . toMarkup) ! class_ "labels"
     sequence_ x
   where 
     cols :: Monad m => Table m a -> Html
