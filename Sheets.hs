@@ -13,6 +13,9 @@ module Sheets
   , see
   , blank
   , (*.)
+  , (!.)
+  , ($.)
+  , (%.)
   , Layout(..)
   , horizontal
   , renderTable
