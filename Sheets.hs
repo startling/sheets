@@ -96,6 +96,18 @@ blank = Field [] Nothing $ \_ -> return empty
 (*.) :: Field m a -> String -> Field m a
 (*.) f s = classes <>~ [s] $ f
 
+-- | Label a field.
+(!.) :: Field m a -> Text -> Field m a
+(!.) f n = label .~ Just n $ f
+
+-- | Set the monadic function of a field.
+($.) :: Field m a -> (b -> n Text) -> Field n b
+($.) f g = field .~ g $ f
+
+-- | Set the monadic function of a field from an ordinary function.
+(%.) :: Monad n => Field m a -> (b -> Text) -> Field n b
+(%.) f g = field .~ (return . g) $ f
+
 data Layout a
   = Column [Either a (Layout a)]
   | Adjacent [Either a (Layout a)]
