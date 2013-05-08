@@ -48,6 +48,7 @@ data-files:          data/*.css
 library
   exposed-modules:
       Sheets
+    , Sheets.Html
   other-modules:
       Paths_sheets
   build-depends:
