@@ -12,6 +12,7 @@ module Sheets
   , items
   , rows
   , columns
+  , transform
   , split
   , split'
   , counter
@@ -30,7 +31,7 @@ import Control.Monad.State
 import Data.Text (Text)
 import Data.Text (pack, empty)
 -- lens
-import Control.Lens
+import Control.Lens hiding (transform)
 
 data Field m a = Field
   { _classes :: [String]
@@ -53,6 +54,10 @@ rows fn (Table _ cs is) = forM is $ \i -> forM cs (($ i) . view field) >>= fn
 -- | Monadically traverse the columns in a table.
 columns :: Monad m => ([Text] -> m c) -> Table m t -> m [c]
 columns fn (Table _ cs is) = forM cs $ \(Field _ _ c) -> forM is c >>= fn
+
+transform :: (m Text -> n Text) -> Table m a -> Table n a
+transform fn (Table t f i) = Table t (map transform' f) i where
+  transform' (Field c l f) = Field c l $ fn . f
 
 -- | Split a table, given the number of rows each should have.
 split :: Int -> Table m a -> [Table m a]
