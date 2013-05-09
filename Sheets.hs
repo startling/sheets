@@ -13,6 +13,7 @@ module Sheets
   , items
   , rows
   , columns
+  , transform
   , split
   , split'
   , counter
@@ -23,7 +24,7 @@ module Sheets
   , (%.)
   , Layout(..)
   , horizontal )
-  where
+  where        
 -- base
 import Control.Applicative
 import Data.Monoid
@@ -62,6 +63,10 @@ rows fn (Table _ cs is) = forM is $ \i ->
 columns :: Monad t => ([t1] -> t b) -> Table t a t1 -> t [b]
 columns fn (Table _ cs is) = forM cs $ \c ->
   forM is (view field c) >>= fn
+
+-- | Transform the monad held by a table.
+transform :: (m b -> n b) -> Table m a b -> Table n a b
+transform fn = over fields (map $ over field (fn .))
 
 -- | Split a table, given the number of rows each should have.
 split :: Int -> Table m a b -> [Table m a b]
