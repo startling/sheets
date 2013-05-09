@@ -103,7 +103,7 @@ make ::
   ( MonadIO m
   , MonadState Int n
   , MonadReader Configuration m
-  ) => m (Layout (Table n Text))
+  ) => m (Layout (Table n Text Text))
 make = horizontal `liftM` view cols `ap` do
   co <- view count
   tt <- view title
@@ -115,12 +115,11 @@ compile ::
   ( Monad n
   , MonadIO m
   , MonadReader Configuration m
-  ) => (Layout (Table n x)) -> m (n Html)
+  ) => (Layout (Table n x Html)) -> m (n Html)
 compile l = view fragment >>=
   \fp -> if fp then return $ renderLayout renderTable l
     else flip renderWhole l `liftM`
       (view stylesheet >>= (liftIO . T.readFile))
-
 
 display :: (MonadIO m, MonadReader Configuration m) => String -> m ()
 display x = view output >>= \o -> liftIO $ case o of
@@ -129,7 +128,7 @@ display x = view output >>= \o -> liftIO $ case o of
 
 run :: (MonadIO m, MonadReader Configuration m) => m ()
 run = ((renderHtml . flip evalState 0)
-  `liftM` (make >>= compile)) >>= display
+  `liftM` (liftM (fmap (fmap toMarkup)) make >>= compile)) >>= display
 
 main :: IO ()
 main = parser >>= execParser >>= runReaderT run
