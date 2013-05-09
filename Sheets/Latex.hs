@@ -26,7 +26,7 @@ multicolumn n c = liftL $ \l -> TeXComm "multicolumn"
   , FixArg l
   ]
 
-renderTable :: Monad m => Table m x -> LaTeXT m ()
+renderTable :: Monad m => Table m a LaTeX -> LaTeXT m ()
 renderTable t = let cs = length $ view fields t in
   tabular Nothing (specs cs) $ do
     hline
@@ -35,21 +35,19 @@ renderTable t = let cs = length $ view fields t in
       Just x -> do 
         multicolumn cs
           [ VerticalLine, CenterColumn, VerticalLine ]
-          . text $ x
+          . fromLaTeX $ x
         lnbk
         hline
-    case traverse (fmap text . view S.label) . view fields $ t of
+    case traverse (fmap fromLaTeX . view S.label) . view fields $ t of
       Nothing -> return ()
       Just [] -> lnbk >> hline
       Just (l : ls) -> foldl (&) l ls >> lnbk >> hline
     flip rows (S.transform lift t) $ \x
-      -> (>> (lnbk >> hline)) $ case map text x of
+      -> (>> (lnbk >> hline)) $ case map fromLaTeX x of
         [] -> return ()
         (x : xs) -> foldl (&) x xs
     return ()
   where
-    text :: LaTeXC l => Text -> l
-    text = fromLaTeX . TeXRaw . protectText
     specs :: Int -> [TableSpec]
     specs n = (:) VerticalLine . concatMap (: [VerticalLine])
       $ replicate n CenterColumn
