@@ -21,9 +21,9 @@ import Paths_sheets
 #endif
 
 -- | Render a table simply to html.
-renderTable :: Monad m => Table m t -> m Html
+renderTable :: Monad m => Table m a Html -> m Html
 renderTable t = do
-  x <- flip rows t $ return . T.tr . mapM_ (T.td . toMarkup)
+  x <- flip rows t $ return . T.tr . mapM_ T.td
   return . T.table $ do
     T.colgroup $ cols t
     case (view title t) of
@@ -32,18 +32,16 @@ renderTable t = do
         (fromString . show . length $ view fields t)
     case traverse (view label) . view fields $ t of
       Nothing -> return ()
-      Just ls -> T.tr (forM_ ls $ T.td . toMarkup) ! class_ "labels"
+      Just ls -> T.tr (forM_ ls T.td) ! class_ "labels"
     sequence_ x
   where 
-    cols :: Monad m => Table m a -> Html
-    cols = mapMOf_ (fields . traverse) toCol where
-      toCol :: Monad m => Field m a -> Html
-      toCol f = let s = view classes f in
-        if null s then T.col
-          else T.col ! class_ (fromString . unwords $ s)
+    cols = mapMOf_ (fields . traverse) toCol
+    toCol f = let s = view classes f in
+      if null s then T.col
+        else T.col ! class_ (fromString . unwords $ s)
 
 -- | Render a 'Layout' to html.
-renderLayout :: Monad m => (a -> m Html) -> Layout a -> m Html
+renderLayout :: Monad m => (t -> m Html) -> Layout t -> m Html
 renderLayout f (Column (Left a : [])) = f a
 renderLayout f (Column cs) = liftM sequence_ $
   forM cs $ either f (renderLayout f)
@@ -52,7 +50,7 @@ renderLayout f (Adjacent as) = liftM sequence_ $ forM as $
   liftM ((! class_ "_adjacent") . T.div) . either f (renderLayout f)
 
 -- | Render a 'Layout' of 'Table' as a full document, given some css.
-renderWhole :: Monad m => Text -> Layout (Table m t) -> m Html
+renderWhole :: Monad m => Text -> Layout (Table m a Html) -> m Html
 renderWhole css = liftM (template css) . renderLayout renderTable where
   -- | Basic html to wrap something in.
   template :: Text -> Html -> Html
