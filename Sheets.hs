@@ -122,6 +122,13 @@ data Layout a
   , Show
   )
 
+instance Functor Layout where
+  fmap fn cs = case cs of
+    Column es -> Column $ map (alter fn) es
+    Adjacent es -> Adjacent $ map (alter fn) es
+    where alter fn (Left a) = Left $ fn a
+          alter fn (Right x) = Right $ fmap fn x
+
 -- | Split a table horizontally into tables with the given
 -- number of columns.
 horizontal :: Int -> Table m a b -> Layout (Table m a b)
