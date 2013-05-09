@@ -35,36 +35,36 @@ import Data.Text (pack)
 -- lens
 import Control.Lens hiding (transform)
 
-data Field a b = Field
+data Field m a b = Field
   { _classes :: [String]
-  , _label :: Maybe Text
-  , _field :: a -> b
+  , _label :: Maybe b
+  , _field :: a -> m b
   } deriving
   ( Functor
   )
 makeLenses ''Field
 
-data Table a b = Table
-  { _title  :: Maybe Text
-  , _fields :: [Field a b]
+data Table m a b = Table
+  { _title  :: Maybe b
+  , _fields :: [Field m a b]
   , _items  :: [a]
   } deriving
   ( Functor
   )
 makeLenses ''Table 
 
--- | Traverse the rows in a table.
-rows :: Applicative f => ([a] -> f b) -> Table x a -> f [b]
-rows fn (Table _ cs is) = flip traverse is $ \i ->
-  fn $ map (($ i) . view field) cs
+-- -- | Traverse the rows in a table.
+rows :: Monad m => ([a] -> m b) -> Table m x a -> m [b]
+rows fn (Table _ cs is) = forM is $ \i ->
+  forM cs (($ i) . view field) >>= fn
 
--- | Traverse the columns in a table.
-columns :: Applicative f => ([t] -> f b) -> Table a t -> f [b]
-columns fn (Table _ cs is) = flip traverse cs $ \c ->
-  fn $ map (view field c) is
+-- | Monadically traverse the columns in a table.
+columns :: Monad t => ([t1] -> t b) -> Table t a t1 -> t [b]
+columns fn (Table _ cs is) = forM cs $ \c ->
+  forM is (view field c) >>= fn
 
 -- | Split a table, given the number of rows each should have.
-split :: Int -> Table m a -> [Table m a]
+split :: Int -> Table m a b -> [Table m a b]
 split n (Table t fs is) = Table t fs `map` taking n is where
   taking :: Int -> [a] -> [[a]]
   taking _ [] = []
@@ -72,7 +72,7 @@ split n (Table t fs is) = Table t fs `map` taking n is where
 
 -- | Split a table into a table with twice as many fields and
 -- half as many items.
-split' :: Table a b -> Table (a, a) b
+split' :: Table m a b -> Table m (a, a) b
 split' (Table t fs is) = Table t
   (map (over field (. fst)) fs ++ map (over field (. snd)) fs)
   . uncurry zip . splitAt (length is `div` 2) $ is
@@ -80,29 +80,33 @@ split' (Table t fs is) = Table t
 -- | A column taking a lens into a number in the state and
 -- counting up from that number.
 counter :: (Show n, Num n, MonadState s m) =>
-  Simple Lens s n -> Field x (m Text)
+  Simple Lens s n -> Field m x Text
 counter l = Field ["count"] Nothing . const $ (l += 1)
   >> ((pack . show) `liftM` use l)
 
 -- | The identity field.
-see :: Field a a
-see = Field [] Nothing id
+see :: Monad m => Field m b b
+see = Field [] Nothing return
 
 -- | A field showing an empty value.
-blank :: Monoid b => Field a b
-blank = Field [] Nothing $ const mempty
+blank :: (Monad m, Monoid b) => Field m a b
+blank = Field [] Nothing . const . return $ mempty
 
 -- | Add a class to a 'Field'.
-(*.) :: Field m a -> String -> Field m a
+(*.) :: Field m a b -> String -> Field m a b
 (*.) f s = classes <>~ [s] $ f
 
 -- | Label a field.
-(!.) :: Field m a -> Text -> Field m a
+(!.) :: Field m a b -> b -> Field m a b
 (!.) f n = label .~ Just n $ f
 
--- | Set the function of a field.
-(%.) :: Field a b -> (c -> d) -> Field c d
-(%.) f g = field .~ g $ f
+-- | Set the monadic function of a field.
+($.) :: Field m a b -> (a1 -> m1 b) -> Field m1 a1 b
+($.) f g = field .~ g $ f
+
+-- | Set the monadic function of a field, from an ordinary function.
+(%.) :: Monad m => Field m a b -> (z -> b) -> Field m z b
+(%.) f g = field .~ return . g $ f
 
 data Layout a
   = Column [Either a (Layout a)]
@@ -115,11 +119,11 @@ data Layout a
 
 -- | Split a table horizontally into tables with the given
 -- number of columns.
-horizontal :: Int -> Table m a -> Layout (Table m a)
+horizontal :: Int -> Table m a b -> Layout (Table m a b)
 horizontal n = Adjacent . map Left . split n
 
 -- | Split a table vertically into tables with the given
 -- number of columns.
-vertical :: Int -> Table m a -> Layout (Table m a)
+vertical :: Int -> Table m a b -> Layout (Table m a b)
 vertical n = Column . map Left . split n
 
