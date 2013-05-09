@@ -1,7 +1,6 @@
 {-# Language OverloadedStrings #-}
 module Sheets.Latex
   ( renderTable
-  , module Text.LaTeX.Base
   ) where
 -- base
 import Data.List
@@ -13,9 +12,7 @@ import Control.Lens hiding ((&))
 -- HaTeX
 import Text.LaTeX.Base
 import Text.LaTeX.Base.Class
-import Text.LaTeX.Base.Types
 import Text.LaTeX.Base.Syntax
-import Text.LaTeX.Base.Commands
 -- Sheets
 import Sheets as S
 
@@ -39,7 +36,7 @@ renderTable t = let cs = length $ view fields t in
         lnbk
         hline
     case traverse (fmap fromLaTeX . view S.label) . view fields $ t of
-      Nothing -> return ()
+      Nothing -> return ()        
       Just [] -> lnbk >> hline
       Just (l : ls) -> foldl (&) l ls >> lnbk >> hline
     flip rows (S.transform lift t) $ \x
