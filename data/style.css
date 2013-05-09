@@ -29,12 +29,17 @@ td {
 }
 
 th {
-    font-size: 1.5em;
     font-weight: normal;
-    border: 1px solid #333;
     font-variant: small-caps;
     color: #fff;
+    border: 1px solid #333;
+    font-size: 1.5em;
     background: #333;
+}
+
+tr.labels > td {
+    font-variant: small-caps;
+    font-size: 1.5em;
 }
 
 col.count {
@@ -45,7 +50,6 @@ col.count {
 
 td:first-child {
     border-left: 1px solid;
-    text-align: left;
 }
 
 
